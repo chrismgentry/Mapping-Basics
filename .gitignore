@@ -1,0 +1,12 @@
+#file types to ignore
+*.Rproj
+*.txt
+*.Rmd
+*.Rhistory
+
+#files to ignore
+Mapping_Script.R
+previous_index.html
+
+#RStudio files
+.Rproj.user/
