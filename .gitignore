@@ -7,6 +7,7 @@
 #files to ignore
 Mapping_Script.R
 previous_index.html
+README.html
 
 #RStudio files
 .Rproj.user/
