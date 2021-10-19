@@ -73,20 +73,26 @@ When using **R** for spatial analysis there are a number of graphics packages th
 
 For this exercise you will use a few common packages for working with spatial data. Once again, many of these packages will require dependencies so installing them may take some time.
 
-<p align="center">
+<table style="width:100%">
+  <tr>
+    <td><i>ggsn</i></td>
+    <td><i>leaflet</i></td>
+    <td><i>mapdata</i></td>
+    <td><i>maptools</i></td>
+    <td><i>OpenStreetMap</i></td>
+    <td><i>rgdal</i></td>
+    <td><i>TidyVerse</i></td>
+  </tr>
+</table><br>
 
-`ggsn` \| `leaflet` \| `mapdata` \| `maptools` \| `OpenStreetMap` \| `rgdal` \| `tidyverse`
-
-</p>
-
-As discussed in a previous class, there are various scripts and packages that can be used for package management. For this I use `pacman` which is a "management tool that combines the functionality of base library related functions into intuitively named functions." While my use of the package is limited the following script is useful when providing a script to colleagues or making it available on _GitHub_:
+As discussed in a previous class, there are various scripts and packages that can be used for package management. For this I use `pacman` which is a "management tool that combines the functionality of base library related functions into intuitively named functions." While my use of the package is limited the following script is useful when providing a script to colleagues or making it available on _GitHub_: 
 
 ```{r Packages, message=FALSE, warning=FALSE}
 install.packages('pacman')
 pacman::p_load("ggsn","leaflet","mapdata","maptools","OpenStreetMap","rgdal","tidyverse")
 ```
 
-The `p_load` function in `pacman` is a wrapper for the `library` and `require` functions from base R. It will check to see if a package is installed and, if not, attempt to install it from CRAN. You can view the other functions available in `pacman` [here](https://www.rdocumentation.org/packages/pacman/versions/0.5.1)
+The `p_load` function in `pacman` is a wrapper for the `library` and `require` functions from base R. It will check to see if a package is installed and, if not, attempt to install it from CRAN. You can view the other functions available in `pacman` [here](https://www.rdocumentation.org/packages/pacman/versions/0.5.1 "Click Here").
 
 These packages will provide the minimum functionality required to complete this exercise. As you experiment with various styles of mapping you may require additional packages to be installed at a later time.
 
@@ -146,7 +152,7 @@ CampusMap <- openmap(c(36.5360,-87.3570),
 APSU <- openproj(CampusMap, projection = "+proj=longlat +ellps=WGS84 +units=m +no_defs")
 ```
 
-In the script above the bounding box was identified, the type of map listed (view `?openmap` for additional options), and the projection for the map was set. Refer to the lecture for information regarding the projection and ellipsoid.
+In the script above, the bounding box was identified, the type of map listed (view `?openmap` for additional options), and the projection for the map was set. Refer to the lecture for information regarding the projection and ellipsoid.
 
 Alternatively, with the \*.csv file loaded you could use a modified script like:
 
@@ -199,7 +205,7 @@ Notice the data is not stored in a typical dataframe-like structure and instead 
 - bbox: the bounding rectangle listed as min and max values for x,y
 - proj4string: the projection
 
-It is here where some knowledge of base R is important. the `campusOGR@` provides information about the slots but only the `@data` slot allows the use of the $ to view the underlying information. The other slots will only allow you to directly access a row, column, or specific record by use of bracketed commands such as `campusOGR@coords[1,]` which will provide all of the information in row 1 or `campusOGR@coords[,1]` that will let you view all of the information in the first column. This is one of the reasons you will be converting the SF class SpatialPointsDataFrame to a typical dataframe you are more accustom to working with.
+It is here where some knowledge of base R is important. the `campusOGR@` provides information about the slots but only the `@data` slot allows the use of the $ to view the underlying information. The other slots will only allow you to directly access a row, column, or specific record by use of bracketed commands such as `campusOGR@coords[1,]` which will provide all of the information in row 1 or `campusOGR@coords[,1]` that will let you view all of the information in the first column. This is one of the reasons you will be converting the S4 class SpatialPointsDataFrame to a typical dataframe you are more accustom to working with.
 
 So to convert the point kml to a data.frame:
 ```{r convert kml to df, message=FALSE, warning=FALSE}
@@ -217,13 +223,17 @@ colnames(campus_points) <- c("Name","X","Y")
 
 This allowed us to create a data.frame out of the coordinate values and data values, removed unnecessary columns, and renamed the columns. If you `view(campus_points)` now you will see a much more familiar dataset.
 
-The data behind a polygon-based kml imported as a SF class SpatialPolygonsDataFrame is even more complex because one (1) individual polygon is made from no less than three (3) points. Therefore to draw a polygon R needs to be able to determine which point to begin with, which to move to next... , and finally how to return to the original point. This necessitates slots for:
+The data behind a polygon-based kml imported as a S4 class SpatialPolygonsDataFrame is even more complex because one (1) individual polygon is made from no less than three (3) points. Therefore to draw a polygon R needs to be able to determine which point to begin with, which to move to next... , and finally how to return to the original point. This necessitates slots for:
 
 - polygons
 - plot order
 - id
 
-As well as the other slots in the previous SpatialPointsDataFrame. In this example there is only one (1) polygon which encompasses the main campus and no additional data. If there were several polygons each would have its own slot with additional slots listed above. You can see how this information can quickly become complex. To convert this individual polygon kml to a dataframe:
+As well as the other slots in the previous SpatialPointsDataFrame. In this example there is only one (1) polygon which encompasses the main campus and no additional data. 
+
+<p align="center"><div class="zoom"><img src= "Images/rstudio-outlineOGR.jpg" alt="KML Polygon Data Example" style="width:100%"></div></p>
+
+If there were several polygons each would have its own slot with additional slots listed above. You can see how this information can quickly become complex. To convert this individual polygon kml to a dataframe:
 
 ```{r convert polygon kml, message=FALSE, warning=FALSE}
 outlineOGR <- readOGR("./Data/Main_Campus.kml")
@@ -350,4 +360,4 @@ This is only a very small fraction of the possible applications for mapping that
 
 # Your Turn!
 
-Using the skills discussed in this exercise, create two site maps for your thesis project or other dataset of interest. You should create one static and one interactive map, and they can contain as many datasets or features as you feel are necessary to properly display your data. The maps should be added to a project page you created or have begun to develop for your semester project and/or research project. Remember that this page should be consistently updated throughout the remainder of the semester culminating in your final presentation to the class in December. For an added challenge, you can try to fork this repository to give you access to the data files and a jump start on your script.
+Using the skills discussed in this exercise, create two site maps for your thesis project or other dataset of interest. You should create one static and one interactive map, and they can contain as many datasets or features as you feel are necessary to properly display your data. The maps should be added to a project page you created or have begun to develop for your semester project and/or research project. Remember that this page should be consistently updated throughout the remainder of the semester culminating in your final presentation to the class in December. For an added challenge, you can try to fork [this repository](https://github.com/chrismgentry/Mapping-Basics "Click Here") to give you access to the data files and a jump start on your script.
