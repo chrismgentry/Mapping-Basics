@@ -1,8 +1,9 @@
 #file types to ignore
 *.Rproj
 *.txt
-*.Rmd
 *.Rhistory
+*.gslides
+*.nb.html
 
 #files to ignore
 Mapping_Script.R
@@ -11,3 +12,6 @@ README.html
 
 #RStudio files
 .Rproj.user/
+
+#Folders
+Images/
