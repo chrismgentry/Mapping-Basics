@@ -4,6 +4,7 @@
 *.Rhistory
 *.gslides
 *.nb.html
+*.RData
 
 #files to ignore
 Mapping_Script.R
