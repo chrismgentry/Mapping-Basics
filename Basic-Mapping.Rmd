@@ -88,7 +88,7 @@ For this exercise you will use a few common packages for working with spatial da
 As discussed in a previous class, there are various scripts and packages that can be used for package management. For this I use `pacman` which is a "management tool that combines the functionality of base library related functions into intuitively named functions." While my use of the package is limited the following script is useful when providing a script to colleagues or making it available on _GitHub_: 
 
 ```{r Packages, message=FALSE, warning=FALSE}
-install.packages('pacman')
+#install.packages('pacman')
 pacman::p_load("ggsn","leaflet","mapdata","maptools","OpenStreetMap","rgdal","tidyverse")
 ```
 
@@ -141,7 +141,7 @@ It's likely that the map you need to create is slightly more complex than the on
 
 > Note in 2021: OpenStreeMap requires Java and causes some issues for macOS users. One possible fix is to install Java JDK 11 from [https://adoptopenjdk.net/](https://adoptopenjdk.net/). After installing the software input the following code into the console in RStudio:
 Sys.setenv(JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk-11.0.9.jdk/Contents/Home') <br>
-This fix was developed by members of the APSU OIT.
+This fix was developed by members of the APSU OIT. Do not try if you are not familiar with installing software or setting system variables. Use at your own risk.
 
 To use `OpenStreetMap` you need to first obtain upper-left and lower-right coordinates for the location you are interested in displaying. This can be done through programs like **Google Earth** or through `min()` and `max()` commands using the information in your dataset.
 
@@ -241,7 +241,7 @@ outline_poly <- as.data.frame(cbind(outlineOGR@polygons[[1]]@Polygons[[1]]@coord
 colnames(outline_poly) <- c("X","Y")
 ```
 
-This script created a dataframe out of the coordinate values for the polygon. Because there is only one polygon the order the values are drawn is sequential which creates the correct shape for this exercise. If you have a file with multiple polygons you will need to write a script that takes the coordinates for each polygon and adds a _group_ variable that is unique for each polygon. Then in the `ggplot` aesthetics you would have `aes(x=x,y=y,group=group` to inform ggplot to draw each polygon based on their gropup information. An example of this can be found in `view(tn)` from the script above. Notice the columns for _lat_, _long_, and _group_ along with other identifers. 
+This script created a dataframe out of the coordinate values for the polygon. Because there is only one polygon the order the values are drawn is sequential which creates the correct shape for this exercise. If you have a file with multiple polygons you will need to write a script that takes the coordinates for each polygon and adds a _group_ variable that is unique for each polygon. Then in the `ggplot` aesthetics you would have `aes(x=x,y=y,group=group` to inform ggplot to draw each polygon based on their gropup information. An example of this can be found in `view(tn)` from the script above. Notice the columns for _lat_, _long_, and _group_ along with other identifiers. 
 
 Now you can use these files to map the data from the kml files similar to the previous map of the csv data.
 
@@ -262,7 +262,7 @@ While there are a number of packages that can help create interactive maps such 
 
 In the most simple version, you set the point dataset you want to use for the map, tell `leaflet` the sort of markers you want to use to identify the points, and then let `leaflet` obtain the *OSM* tiles for the background image.
 
-```{r leaflet simple, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r leaflet simple, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
 leaflet(campusOGR) %>% 
   addTiles() %>% 
   addMarkers(popup = campusOGR@data$Name)
@@ -270,7 +270,7 @@ leaflet(campusOGR) %>%
 
 Clicking on the markers will identify the place based on the "name" variable in our data. Because there is additional data from the polygon kml you can add to the map and customize it further.
 
-```{r point polygon leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r point polygon leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
 leaflet(campusOGR) %>% 
   addTiles() %>%
   addPolygons(outlineOGR, 
@@ -295,7 +295,7 @@ campusOGR@data$Description <- c("Academic", "Adminstrative", "Academic", "Librar
 
 In the script above you provided a description of the polygon and descriptions of each building that can be used to identify the purpose of the building when the cursor hovers over the point. This could have been completed in a previous step instead of removing the column.
 
-```{r ineractive leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r ineractive leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
 leaflet(campusOGR) %>% 
   addTiles() %>%
   addPolygons(outlineOGR, 
@@ -318,7 +318,7 @@ Notice now that when you move the cursor around there is additional information 
 
 **Leaflet** has a number of possible backgrounds that can be included as a basemap to your project. For example, if you were interested in elevation you can connect to a web-mapping service to obtain a zoomable terrain layer
 
-```{r ineractive zion map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r ineractive zion map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
 leaflet() %>% 
   setView(lng = -112.956472, lat = 37.251343, zoom = 13) %>%
   addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WmsServer", layers = "0") %>%
@@ -330,7 +330,7 @@ leaflet() %>%
 
 Additionally, you can incorporate several basemaps and add an interactive selection tool to chose what background to display, set transparencies for multiple backgrounds to be displayed at once, have live updates streamed to your map, or toggle the data off and on.
 
-```{r multi background map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r multi background map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
 leaflet(campusOGR) %>% 
   addTiles(group = "OSM")%>%
   addProviderTiles(providers$CartoDB.Positron, group = "CartoDB") %>%
@@ -360,4 +360,4 @@ This is only a very small fraction of the possible applications for mapping that
 
 # Your Turn!
 
-Using the skills discussed in this exercise, create two site maps for your thesis project or other dataset of interest. You should create one static and one interactive map, and they can contain as many datasets or features as you feel are necessary to properly display your data. The maps should be added to a project page you created or have begun to develop for your semester project and/or research project. Remember that this page should be consistently updated throughout the remainder of the semester culminating in your final presentation to the class in December. For an added challenge, you can try to fork [this repository](https://github.com/chrismgentry/Mapping-Basics "Click Here") to give you access to the data files and a jump start on your script.
+Using the skills discussed in this exercise, create two site maps for your thesis project or other dataset of interest. You should create one static and one interactive map, and they can contain as many datasets or features as you feel are necessary to properly display your data. The maps should be added to a project page you created or have begun to develop for your semester project and/or research project. Remember that this page should be consistently updated throughout the remainder of the semester culminating in your final presentation to the class in December. For an added challenge, you can try to fork [this repository](https://github.com/chrismgentry/Mapping-Basics "Click Here") to give you access to the data files and a jump start on your script. 
