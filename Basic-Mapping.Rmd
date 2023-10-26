@@ -4,6 +4,9 @@ author: "Austin Peay State University"
 output:
   html_document:
     toc: yes
+    toc_float: true
+    collapsed: no
+    smooth_scroll: yes
     df_print: paged
   pdf_document: default
   html_notebook:
@@ -13,7 +16,7 @@ output:
     highlight: breezedark
     number_sections: yes
     toc: yes
-    toc_float:
+    toc_float: 
       collapsed: no
       smooth_scroll: yes
 editor_options:
@@ -73,7 +76,8 @@ When using **R** for spatial analysis there are a number of graphics packages th
 
 For this exercise you will use a few common packages for working with spatial data. Once again, many of these packages will require dependencies so installing them may take some time.
 
-<table style="width:100%">
+<table style="width:50%">
+<table class="center">
   <tr>
      <td><i>leaflet</i></td>
      <td><i>OpenStreetMap</i></td>
