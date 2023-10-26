@@ -2,6 +2,10 @@
 title: "Mapping Basics <br><small>BIOL 5660, Advanced Data Analytics</small></br>"
 author: "Austin Peay State University"
 output:
+  html_document:
+    toc: yes
+    df_print: paged
+  pdf_document: default
   html_notebook:
     df_print: paged
     rows.print: 10
@@ -12,10 +16,6 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: yes
-  pdf_document: default
-  html_document:
-    toc: yes
-    df_print: paged
 editor_options:
   chunk_output_type: inline
   mode: gfm
@@ -63,11 +63,11 @@ th, td {padding: 5px;}
 ```
 # Mapping in R
 
-To be fair, cartography and spatial analysis is not one of my favorite things to do in **R**. While nearly every statistical analysis you want to do has several packages that can accomplish the same task, rarely do they rely on drastically different types of data. This is why a lot of spatial analysis is still performed in programs such as *ArcGIS* or [*QGIS*](https://qgis.org/en/site/). However, moving from one program to another often requires reformatting the data which can also be cumbersome. So maintaining the data within a single program to manage, format, analyze, and visualize helps to create a usable, repeatable workflow. That's why data analysis and visualization in **R** is becoming standard practice in many disciplines.
+To be fair, cartography and spatial analysis is not one of the easiest things to do in **R**. While nearly every statistical analysis you want to do has several packages that can accomplish the same task, rarely do they rely on drastically different types of data. This is why a lot of spatial analysis is still performed in programs such as *ArcGIS* or [*QGIS*](https://qgis.org/en/site/). However, moving from one program to another often requires reformatting the data which can also be cumbersome. So maintaining the data within a single program to manage, format, analyze, and visualize helps to create a usable, repeatable workflow. That's why data analysis and visualization in **R** is becoming standard practice in many disciplines.
 
 ## Data Types
 
-When using **R** for spatial analysis there are a number of graphics packages that can be used for everything from basic mapping to interactive maps. A few of these packages you may already be familiar with such as `plot` from *base R*, `ggplot2`, `plotly`, `leaflet`, or `tmap`. Many of these packages are dependent on other packages that help you manage, organize, and format spatial data. Packages such as `sf` "Simple Features for R", `sp` "Classes and Methods for Spatial Data", and `rgdal` "Bindings for the 'Geospatial' Data Abstraction Library" provide access to spatial data and spatial data formats for a number of other packages. In order to reduce the overall complexity of this exercise, we will not discuss all of the data formats or packages that can be used to analyze spatial data here. However, I will provide links to useful online resources in the exercise [README](https://github.com/chrismgentry/Mapping-Basics/blob/master/README.md) document.
+When using **R** for spatial analysis there are a number of graphics packages that can be used for everything from basic mapping to interactive maps. A few of these packages you may already be familiar with such as `plot` from *base R*, `ggplot2`, `plotly`, `leaflet`, or `tmap`. Many of these packages are dependent on other packages that help you manage, organize, and format spatial data. Packages such as `sf` "Simple Features for R", `terra` "Methods for spatial data analysis with vector and raster data", and `stars` "Tools for manipulating raster and vector data cubes" provide access to spatial data and spatial data formats for a number of other packages. In order to reduce the overall complexity of this exercise, we will not discuss all of the data formats or packages that can be used to analyze spatial data here. However, I will provide links to useful online resources in the exercise [README](https://github.com/chrismgentry/Mapping-Basics/blob/master/README.md) document.
 
 ## Packages
 
@@ -75,12 +75,9 @@ For this exercise you will use a few common packages for working with spatial da
 
 <table style="width:100%">
   <tr>
-    <td><i>ggsn</i></td>
-    <td><i>leaflet</i></td>
-    <td><i>mapdata</i></td>
-    <td><i>maptools</i></td>
-    <td><i>OpenStreetMap</i></td>
-    <td><i>rgdal</i></td>
+     <td><i>leaflet</i></td>
+     <td><i>OpenStreetMap</i></td>
+    <td><i>sf</i></td>
     <td><i>TidyVerse</i></td>
   </tr>
 </table><br>
@@ -89,12 +86,20 @@ As discussed in a previous class, there are various scripts and packages that ca
 
 ```{r Packages, message=FALSE, warning=FALSE}
 #install.packages('pacman')
-pacman::p_load("ggsn","leaflet","mapdata","maptools","OpenStreetMap","rgdal","tidyverse")
+pacman::p_load("leaflet","OpenStreetMap","sf","tidyverse")
 ```
 
 The `p_load` function in `pacman` is a wrapper for the `library` and `require` functions from base R. It will check to see if a package is installed and, if not, attempt to install it from CRAN. You can view the other functions available in `pacman` [here](https://www.rdocumentation.org/packages/pacman/versions/0.5.1 "Click Here").
 
 These packages will provide the minimum functionality required to complete this exercise. As you experiment with various styles of mapping you may require additional packages to be installed at a later time.
+
+> Note in 2023: A number of packages used in my typical spatial work flow including `maptools`, `rgdal`, `rgeos`, and `sp` are being archived by October 2023. You can read the report [here](https://r-spatial.org/r/2023/05/15/evolution4.html "Click Here"). This change impacts several packages such as `ggsn` (used to add some essential map elements), `adehabitat` (for homerange estimation), and `GapAnalysis` (to calculate conservation indicators) which have been used for spatial analysis of ecological data. Some packages loaded outside of the script above with the base `install.packages()` function while others would not. A few of these packages can still be loaded from the archive but each update of R will limit their functionality until they no longer operate. Here is the basic syntax to load archived packages:
+
+```
+require(devtools)
+install_version("PACKAGE NAME", version = "PACKAGE VERSION", repos = "http://cran.us.r-project.org")
+```
+> You can find archived packages at https://cran.r-project.org/src/contrib/Archive. Once you find the correct package, click on the folder to view the different published versions. Using the script above, add the package name and the version to the script and see if it will install. If you receive an error, occassionally there is an archived dependency that also needs loaded which makes this a bandaid and not a solution. Eventually these exercises will be update with the newest functions and packages. 
 
 # Simple Maps
 
@@ -139,8 +144,8 @@ It's likely that the map you need to create is slightly more complex than the on
 
 > Note in 2019: As of mid-2018, Google began requiring an API key for use with `get_map` that allowed for Google imagery to be used as basemaps. Although you can obtain a certain number of maps free per month, I have chosen to avoid that set-up for this example.
 
-> Note in 2021: OpenStreeMap requires Java and causes some issues for macOS users. One possible fix is to install Java JDK 11 from [https://adoptopenjdk.net/](https://adoptopenjdk.net/). After installing the software input the following code into the console in RStudio:
-Sys.setenv(JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk-11.0.9.jdk/Contents/Home') <br>
+> Note in 2021: OpenStreeMap requires Java and causes some issues for macOS users. One possible fix is to install **Java JDK 11** from [https://adoptopenjdk.net/](https://adoptium.net/temurin/releases/). After installing the software input the following code into the console in RStudio:
+Sys.setenv(JAVA_HOME=‘/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home’) <br>
 This fix was developed by members of the APSU OIT. Do not try if you are not familiar with installing software or setting system variables. Use at your own risk.
 
 To use `OpenStreetMap` you need to first obtain upper-left and lower-right coordinates for the location you are interested in displaying. This can be done through programs like **Google Earth** or through `min()` and `max()` commands using the information in your dataset.
@@ -173,88 +178,84 @@ With the addition of the aerial photo there is accompanying spatial information 
 
 ## Using KMLs or Shapefiles
 
-Occasionally you will receive information from a collaborator that is not a \*.csv file. Depending on the individual, that information might be provided as a \*.kml file from **Google Earth** or in an **ESRI** *shapefile*. Using a simple import command in the `rgdal` package, these files can also be used with `ggplot2`.
+Occasionally you will receive information from a collaborator that is not a \*.csv file. Depending on the individual, that information might be provided as a \*.kml file from **Google Earth** or in an **ESRI** *shapefile*. Using a simple import command in the `sf` package, and some additional manipulation, these files can also be used with `ggplot2`.
 
 To read either shapefiles or KML files you can use the following syntax:
 
-    readOGR(dsn="path to the shapefile",layer="name of the shapefile")
+```
+    st_read(dsn="path to the shapefile",layer="name of the shapefile")
 
     or
 
-    readOGR("path to kml/name of the file.kml")
+    st_read("path to kml/name of the file.kml")
+```
 
 With this in mind, you can easily use **Google Earth** to create your own datasets and import them into **R** for spatial analysis and mapping. This can be useful when collaborating with individuals or with citizen science projects.
 
-In the data folder of this exercise you will find _Campus_Points.kml_ file and a _Main_Campus.kml file_. The campus points file includes the same data as the previous \*.csv file but as a kml, and the main campus file contains a polygon outline of the main portion of campus. You can use the script above to create datasets out of those files. Alternatively, you can use the URL and the `download.file()` function to download the \*.kml to your project folder:
+In the data folder of this exercise you will find the _Campus_Points.kml_ file and a _Main_Campus.kml file_. The campus points file includes the same data as the previous \*.csv file but as a kml, and the main campus file contains a polygon outline of the main portion of campus. You can use the script above to create datasets out of those files. Alternatively, you can use the URL and the `download.file()` function to download the \*.kml to your project folder:
 
 `download.file('https://raw.githubusercontent.com/chrismgentry/Mapping-Basics/master/Data/Campus_Points.kml', 'Campus_Points.kml')`
 
-Working in `ggplot2` with SpatialPointsDataFrame or SpatialPolygonDataFrame files can be difficult due to the structure of the data types. So to avoid adding additional packages or detailed explanations for this exercise, you will convert the points and polygon to a `data.frame` and learn how they can be used in the spatial form as well. Before altering the dataset, examine its structure after importing the object.
+Working in `ggplot2` with SpatialPointsDataFrame, SpatialPolygonDataFrame, or SF Class files can be difficult due to the structure of the data types. So to avoid adding additional packages or detailed explanations for this exercise, you will convert the points and polygon to a `data.frame` and learn how they can be used in the spatial form as well. Before altering the dataset, examine its structure after importing the object.
 
 ```{r import point kml, message=FALSE, warning=FALSE}
-campusOGR <- readOGR("./Data/Campus_Points.kml")
+campusOGR <- st_read("./Data/Campus_Points.kml")
 ```
 
 <p align="center"><div class="zoom"><img src= "Images/rstudio-campusOGR.jpg" alt="KML Points Data Example" style="width:100%"></div></p>
 
-Notice the data is not stored in a typical dataframe-like structure and instead stored in a series of slots. By typing `campusOGR$` into the console RStudio will return options for "Name" and "Description". In the image above you will find those are the slots under **data**. If instead you were to type `campusOGR@` you will find a list of the different slots
+Notice the location data is not stored in a typical dataframe-like structure and instead stored in a single column. By typing `campusOGR$` into the console RStudio will return options for "Name", "Description", and "Geometry". However, a check of `campusOGR$geometry` will reveal x, y, and z (elevation) data in a single field bound by paraenthesis.
 
-- data: the underlying dataframe
-- coords.nrs: class of the coordinates
-- coords: x, y, and z values for each point
-- bbox: the bounding rectangle listed as min and max values for x,y
-- proj4string: the projection
-
-It is here where some knowledge of base R is important. the `campusOGR@` provides information about the slots but only the `@data` slot allows the use of the $ to view the underlying information. The other slots will only allow you to directly access a row, column, or specific record by use of bracketed commands such as `campusOGR@coords[1,]` which will provide all of the information in row 1 or `campusOGR@coords[,1]` that will let you view all of the information in the first column. This is one of the reasons you will be converting the S4 class SpatialPointsDataFrame to a typical dataframe you are more accustom to working with.
+It is here where some knowledge of base R is important. You can directly access a row, column, or specific record by use of bracketed commands such as `campusOGR[1,]` which will provide all of the information in row 1 or `campusOGR[,1]` that will let you view all of the information in the first column. This is one of the reasons you will be converting the `sf` class data to a typical dataframe you are more accustom to working with.
 
 So to convert the point kml to a data.frame:
 ```{r convert kml to df, message=FALSE, warning=FALSE}
-campus_points <- as.data.frame(cbind(campusOGR@data,campusOGR@coords))
+campus_points <- cbind.data.frame(campusOGR$Name,
+                 st_coordinates(campusOGR)[,1],
+                 st_coordinates(campusOGR)[,2])
 campus_points
 ```
 
-Now look at the object. The data portion that included "Name" and "Description" was combined with the information from the `campusOGR@coords` slot that included three (3) columns of data: x, y, and z (if present). Because there was no z data (elevation) available and no description information you can remove those columns. If you decided to retain those columns you could always populate them with information.
+Now look at the object. The data now includes columns for "name", "x", and "y". However, they retained a naming convention that's difficult to use in `ggplot2` and not particularly inline with data standards.
 
 ```{r edit df, message=FALSE, warning=FALSE}
-campus_points[2] <- NULL
-campus_points[4] <- NULL
 colnames(campus_points) <- c("Name","X","Y")
+head(campus_points, 3)
 ```
 
-This allowed us to create a data.frame out of the coordinate values and data values, removed unnecessary columns, and renamed the columns. If you `view(campus_points)` now you will see a much more familiar dataset.
+This allowed us to create a data.frame out of the coordinate values and data values, removed unnecessary issues, and rename the columns. If you `view(campus_points)` now you will see a much more familiar dataset.
 
-The data behind a polygon-based kml imported as a S4 class SpatialPolygonsDataFrame is even more complex because one (1) individual polygon is made from no less than three (3) points. Therefore to draw a polygon R needs to be able to determine which point to begin with, which to move to next... , and finally how to return to the original point. This necessitates slots for:
-
-- polygons
-- plot order
-- id
+The data behind a polygon-based kml is a little more complex because one (1) individual polygon is made from no less than three (3) points. Therefore to draw a polygon R needs to be able to determine which point to begin with, which to move to next..., next..., next... , and finally how to return to the original point (usually determined by groups or IDs). This necessitates there being far more location information in the geometry column.
 
 As well as the other slots in the previous SpatialPointsDataFrame. In this example there is only one (1) polygon which encompasses the main campus and no additional data. 
 
 <p align="center"><div class="zoom"><img src= "Images/rstudio-outlineOGR.jpg" alt="KML Polygon Data Example" style="width:100%"></div></p>
 
-If there were several polygons each would have its own slot with additional slots listed above. You can see how this information can quickly become complex. To convert this individual polygon kml to a dataframe:
+In this example there is only one (1) polygon which encompasses the main campus with its associated "name", "description", and "geometry". If there were several polygons, each would have its own row with additional data listed above. You can see how this information can quickly become complex. To convert this individual polygon kml to a dataframe:
 
 ```{r convert polygon kml, message=FALSE, warning=FALSE}
-outlineOGR <- readOGR("./Data/Main_Campus.kml")
-outline_poly <- as.data.frame(cbind(outlineOGR@polygons[[1]]@Polygons[[1]]@coords[,1], outlineOGR@polygons[[1]]@Polygons[[1]]@coords[,2]))
-colnames(outline_poly) <- c("X","Y")
+outlineOGR <- st_read("./Data/Main_Campus.kml")
+outline_poly <- cbind.data.frame(st_coordinates(outlineOGR)[,1],
+                                 st_coordinates(outlineOGR)[,2],
+                                 st_coordinates(outlineOGR)[,3],
+                                 st_coordinates(outlineOGR)[,4])
+colnames(outline_poly) <- c("X","Y", "id", "group")
 ```
 
-This script created a dataframe out of the coordinate values for the polygon. Because there is only one polygon the order the values are drawn is sequential which creates the correct shape for this exercise. If you have a file with multiple polygons you will need to write a script that takes the coordinates for each polygon and adds a _group_ variable that is unique for each polygon. Then in the `ggplot` aesthetics you would have `aes(x=x,y=y,group=group` to inform ggplot to draw each polygon based on their gropup information. An example of this can be found in `view(tn)` from the script above. Notice the columns for _lat_, _long_, and _group_ along with other identifiers. 
+This script created a dataframe out of the coordinate values for the polygon. Because there is only one polygon the order the values are drawn is sequential which creates the correct shape for this exercise. If you have a file with multiple polygons you will need to use the _ID_ or _group_ variable that is unique for each polygon to ensure all polygons are drawn correctly. Then in the `ggplot` aesthetics you would have `aes(x=x,y=y,group=group` to inform ggplot to draw each polygon based on their group information. An example of this can be found in `view(tn)` from the script above. Notice the columns for _lat_, _long_, and _group_ along with other identifiers. 
 
 Now you can use these files to map the data from the kml files similar to the previous map of the csv data.
 
 ```{r kml Campus Map, fig.height=8, fig.width=10, message=FALSE, warning=FALSE}
 autoplot.OpenStreetMap(APSU) +
-  geom_polygon(data= outline_poly, aes(x=X, y=Y), alpha = .5, size = 2, color="white") +
+  geom_polygon(data=outline_poly, aes(x = X, y = Y), alpha = .5, size = 2, color="white") +
   geom_point(data=campus_points, aes(x = X, y = Y, color=Name), size = 4, alpha = 0.8) +
   geom_text(data=campus_points,aes(x=X,y=Y,label=Name), color="black", vjust=-0.60, size=4.01, fontface="bold") +
   geom_text(data=campus_points,aes(x=X,y=Y,label=Name), color="white", vjust=-0.75, fontface="bold") +
   labs(x="Longtiude", y="Latitude") + theme(legend.position = "none")
 ```
 
-The script above is a little more confusing using the spatialpolygon class data without conversion. In order to map the aesthetics to the polygon you need to connect to the containers that hold the x and y values. This can be a confusing string (e.g. `outlineOGR@polygons[[1]]@Polygons[[1]]@coords[,1]`) but it is possible. It becomes infinitely more difficult when there is more than one polygon in the file.
+While the `geom_sf` geometry in ggplot could have been used to plot the information, you cannot use the autoplot function with many `sf` class data because of the syntax. Converting the data to a typical dataframe provide a more straightforward syntax withing `ggplot2` that is consistent with with aesthetics for other visualizations.
 
 # Interactive Maps
 
@@ -262,23 +263,27 @@ While there are a number of packages that can help create interactive maps such 
 
 In the most simple version, you set the point dataset you want to use for the map, tell `leaflet` the sort of markers you want to use to identify the points, and then let `leaflet` obtain the *OSM* tiles for the background image.
 
-```{r leaflet simple, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
-leaflet(campusOGR) %>% 
+```{r leaflet simple, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache=FALSE}
+leaflet(campus_points) %>% 
   addTiles() %>% 
-  addMarkers(popup = campusOGR@data$Name)
+  addMarkers(popup = campus_points$Name,
+             lng = campus_points$X, 
+             lat = campus_points$Y)
 ```
 
 Clicking on the markers will identify the place based on the "name" variable in our data. Because there is additional data from the polygon kml you can add to the map and customize it further.
 
 ```{r point polygon leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
-leaflet(campusOGR) %>% 
+leaflet(campus_points) %>% 
   addTiles() %>%
-  addPolygons(outlineOGR, 
+  addPolygons(outline_poly, 
               lng = outline_poly$X, 
               lat = outline_poly$Y,
               fillColor = "grey",
               color = "black") %>%
-  addCircleMarkers(popup = campusOGR@data$Name,
+  addCircleMarkers(popup = campus_points$Name,
+                   lng = campus_points$X, 
+                   lat = campus_points$Y,
                    weight = 2,
                    color = "grey",
                    fillColor = "red",
@@ -288,24 +293,29 @@ leaflet(campusOGR) %>%
 Here you customized the map with APSU colors and added the polygon to the background to identify the "main" campus area. You can take this a step further and provide additional information about the campus buildings and polygon by editing the attributes of each dataset.
 
 ```{r edit attributes of leaflet map, message=FALSE, warning=FALSE}
-outlineOGR@data$Description <- c("Austin Peay State University")
-
-campusOGR@data$Description <- c("Academic", "Adminstrative", "Academic", "Library", "Academic", "Food", "Administrative", "Academic", "Residential", "Administrative", "Administrative", "Bookstore", "Academic", "Academic", "Residential", "Academic", "Academic", "Academic", "Academic", "Residential", "Residential", "Administrative", "Academic")
+campus_points$Description <- c("Academic", "Administrative", "Academic", 
+                               "Library", "Academic", "Food", "Administrative", 
+                               "Academic", "Residential", "Administrative", 
+                               "Administrative", "Bookstore", "Academic", 
+                               "Academic", "Residential", "Academic", "Academic", 
+                               "Academic", "Academic", "Residential", "Residential", 
+                               "Administrative", "Academic")
 ```
 
-In the script above you provided a description of the polygon and descriptions of each building that can be used to identify the purpose of the building when the cursor hovers over the point. This could have been completed in a previous step instead of removing the column.
+In the script above you provided a description of each building that can be used to identify the purpose of the building when the cursor hovers over the point. This could have been completed in a previous step instead of removing the column.
 
-```{r ineractive leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
-leaflet(campusOGR) %>% 
+```{r interactive leaflet map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
+leaflet(campus_points) %>% 
   addTiles() %>%
-  addPolygons(outlineOGR, 
+  addPolygons(outline_poly, 
               lng = outline_poly$X, 
               lat = outline_poly$Y,
-              label = outlineOGR@data$Description,
               fillColor = "grey",
               color = "black") %>%
-  addCircleMarkers(popup = campusOGR@data$Name,
-                   label = campusOGR@data$Description,
+  addCircleMarkers(popup = campus_points$Name,
+                   label = campus_points$Description,
+                   lng = campus_points$X, 
+                   lat = campus_points$Y,
                    weight = 2,
                    color = "grey",
                    fillColor = "red",
@@ -331,21 +341,22 @@ leaflet() %>%
 Additionally, you can incorporate several basemaps and add an interactive selection tool to chose what background to display, set transparencies for multiple backgrounds to be displayed at once, have live updates streamed to your map, or toggle the data off and on.
 
 ```{r multi background map, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, cache = FALSE}
-leaflet(campusOGR) %>% 
+leaflet() %>% 
   addTiles(group = "OSM")%>%
   addProviderTiles(providers$CartoDB.Positron, group = "CartoDB") %>%
   addProviderTiles(providers$Esri.NatGeoWorldMap, group = "NatGeo") %>%
   addProviderTiles(providers$Esri.WorldImagery, group = "ESRI") %>%
-    setView(lng = -87.353069, lat = 36.533654, zoom = 17) %>%
+  setView(lng = -87.353069, lat = 36.533654, zoom = 17) %>%
   addPolygons(outlineOGR, 
               lng = outline_poly$X, 
               lat = outline_poly$Y,
-              label = outlineOGR@data$Description,
               fillColor = "grey",
               color = "black") %>%
-  addCircleMarkers(popup = campusOGR@data$Name,
-                   label = campusOGR@data$Description,
+  addCircleMarkers(popup = campus_points$Name,
+                   label = campus_points$Description,
                    group = "APSU",
+                   lng = campus_points$X, 
+                   lat = campus_points$Y,
                    weight = 2,
                    color = "grey",
                    fillColor = "red",
@@ -360,4 +371,4 @@ This is only a very small fraction of the possible applications for mapping that
 
 # Your Turn!
 
-Using the skills discussed in this exercise, create two site maps for your thesis project or other dataset of interest. You should create one static and one interactive map, and they can contain as many datasets or features as you feel are necessary to properly display your data. The maps should be added to a project page you created or have begun to develop for your semester project and/or research project. Remember that this page should be consistently updated throughout the remainder of the semester culminating in your final presentation to the class in December. For an added challenge, you can try to fork [this repository](https://github.com/chrismgentry/Mapping-Basics "Click Here") to give you access to the data files and a jump start on your script. 
+Using the skills discussed in this exercise, create two site maps for your thesis project or other dataset of interest. You should create one static and one interactive map, and they can contain as many datasets or features as you feel are necessary to properly display your data. The maps should be added to a _GitHub_ project page created for this exercise. For an added challenge, you can try to fork [this repository](https://github.com/chrismgentry/Mapping-Basics "Click Here") to give you access to the data files and a jump start on your script. 
