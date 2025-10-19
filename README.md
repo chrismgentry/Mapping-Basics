@@ -1,6 +1,6 @@
 # Mapping Basics
 
-Mapping Basics Exercise for BIOL 5700, Advanced Data Analytics<br></br>
+Mapping Basics Exercise for BIOL 5650, Advanced Data Analytics<br></br>
 
 This exercise will provide information for using R to create cartographic products. <br></br>
 
@@ -16,13 +16,14 @@ Below you will find resources for understand spatial data and tutorials for crea
 - https://mgimond.github.io/Spatial/introGIS.html
 
 ## Tutorials
-- https://www.computerworld.com/article/3038270/create-maps-in-r-in-10-fairly-easy-steps.html
+- http://www.geo.hunter.cuny.edu/~ssun/R-Spatial/mapping.html
 - https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html
 - https://www.r-spatial.org/r/2018/10/25/ggplot2-sf-2.html
 - https://www.r-spatial.org/r/2018/10/25/ggplot2-sf-3.html
-- https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/
+- https://ajsmit.github.io/Intro_R_Official/mapping-google.html
 - https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html
-- http://mbontrager.org/blog/2016/08/01/Maps-in-R
+- https://daviddhofmann.github.io/post/satelliteimagery/
+- https://cengel.github.io/R-spatial/
 
 ## Helpful site for selecting color schemes
 - http://colorbrewer2.org

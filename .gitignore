@@ -5,12 +5,14 @@
 *.gslides
 *.nb.html
 *.RData
+*.tif
 
 #files to ignore
 Mapping_Script.R
 previous_index.html
 previous_previous_index.html
 README.html
+2025_Mapping_Script.R
 
 #RStudio files
 .Rproj.user/
